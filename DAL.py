@@ -2,13 +2,15 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from models import Tasks as Todo
+from models import Base
 
 engine = create_engine('sqlite:///D:/python_scripts/Tasks/TODO_API/DB/TODO.db', echo=True)
-Base = declarative_base()
 
 Base.metadata.create_all(engine)
 
+
 class TodoDAL:
+
     def __init__(self):
         Session = sessionmaker(bind=engine)
         self.session = Session()
@@ -27,11 +29,13 @@ class TodoDAL:
 
     def get_todo(self, query=None):
         if query:
+            title_query = query.get("title", "")
+            description_query = query.get("description", "")
             todos = self.session.query(Todo).filter(
-                (Todo.title.like(f'%{query}%')) | (Todo.description.like(f'%{query}%'))
+                (Todo.title.like(f'%{title_query}%')) & (Todo.description.like(f'%{description_query}%'))
             ).all()
         else:
-            todos = self.get_all_todos()
+            todos = self.session.query(Todo).all()
         return todos
     
     def update_todo(self, todo_id, title=None, description=None, completed=None):

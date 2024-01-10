@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from typing import List, Optional
 from BAL import TodoBAL
-from models import Todo,TodoCreate,TodoUpdate
+from models import Todo,TodoCreate,TodoUpdate,TodoQuery
 import uvicorn
 
 app = FastAPI()
@@ -13,8 +13,10 @@ async def create_todo(todo: TodoCreate):
     return created_todo
 
 @app.get("/todos/", response_model=List[Todo])
-async def read_todos(query: Optional[str] = None):
-    todos = todo_bal.search_todos(query) if query else todo_bal.get_all_todos()
+async def read_todos(query: Optional[dict]):
+    todos = todo_bal.search_todos(query)
+    if not todos:
+        raise HTTPException(status_code=404, detail="No Todo not found with specified filter")
     return todos
 
 @app.get("/todos/{todo_id}", response_model=Todo)

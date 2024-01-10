@@ -11,16 +11,21 @@ class Todo(BaseModel):
     description: str
     completed: bool
 
-class Tasks(db.Model):
+class Tasks(Base):
     __tablename__ = "Tasks"
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True)
     description = Column(String, index=True)
     completed = Column(Boolean, default=False)
 
+
 class TodoCreate(BaseModel):
     title: str
     description: str
+
+class TodoQuery(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
 
 class TodoUpdate(BaseModel):
     title: Optional[str] = None

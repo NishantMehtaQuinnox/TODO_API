@@ -8,9 +8,6 @@ class TodoBAL:
         todos = self.todo_dal.get_todo()
         return len(todos) == 0
 
-    def get_all_todos(self):
-        return self.todo_dal.get_todo()
-
     def search_todos(self, query):
         return self.todo_dal.get_todo(query)
 
