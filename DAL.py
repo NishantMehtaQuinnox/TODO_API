@@ -1,5 +1,4 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from models import Tasks as Todo
 from models import Base
@@ -32,12 +31,12 @@ class TodoDAL:
             title_query = query.get("title", "")
             description_query = query.get("description", "")
             todos = self.session.query(Todo).filter(
-                (Todo.title.like(f'%{title_query}%')) & (Todo.description.like(f'%{description_query}%'))
-            ).all()
+                (Todo.title.like(f'%{title_query}%'))
+                & (Todo.description.like(f'%{description_query}%'))).all()
         else:
             todos = self.session.query(Todo).all()
         return todos
-    
+
     def update_todo(self, todo_id, title=None, description=None, completed=None):
         todo = self.get_todo_by_id(todo_id)
         if not todo:

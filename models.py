@@ -18,7 +18,6 @@ class Tasks(Base):
     description = Column(String, index=True)
     completed = Column(Boolean, default=False)
 
-
 class TodoCreate(BaseModel):
     title: str
     description: str
