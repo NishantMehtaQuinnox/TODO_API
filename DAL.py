@@ -45,11 +45,7 @@ class TodoDAL:
             todos = self.session.query(Todo).all()
         return todos
 
-    def update_todo(self,
-                    todo_id,
-                    title=None,
-                    description=None,
-                    completed=None):
+    def update_todo(self, todo_id, title=None, description=None, completed=None):
         todo = self.get_todo_by_id(todo_id)
         if not todo:
             return None

@@ -4,7 +4,7 @@ from BAL import TodoBAL
 from models import Todo,TodoCreate,TodoUpdate,TodoQuery
 import uvicorn
 
-use_redis = True
+use_redis = False
 app = FastAPI()
 todo_bal = TodoBAL(use_redis)
 

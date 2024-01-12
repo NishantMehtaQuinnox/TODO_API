@@ -1,5 +1,4 @@
 import redis
-import json
 
 class TodoDALRedis:
     def __init__(self):
