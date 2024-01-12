@@ -3,7 +3,7 @@ import json
 
 class TodoDALRedis:
     def __init__(self):
-        self.redis_client = redis.StrictRedis(host='redis-12453.c325.us-east-1-4.ec2.cloud.redislabs.com', port=12453, decode_responses=True, password="B4AL1yNQ2GlEZcscZSQ3Xnsb3rudV3y7")
+        self.redis_client = redis.StrictRedis(host='redis-18552.c267.us-east-1-4.ec2.cloud.redislabs.com', port=18552, decode_responses=True, password="jdj3wE7esEVxsK9CQ1f3Z74nwBqY8wN2")
         self.todo_key_prefix = 'todo:'
 
     def create_todo(self, title, description):
@@ -15,14 +15,32 @@ class TodoDALRedis:
 
     def get_all_todos(self):
         todo_keys = self.redis_client.keys(f'{self.todo_key_prefix}*')
-        todos = [json.loads(self.redis_client.get(todo_key)) for todo_key in todo_keys]
+        todos = [self.redis_client.hgetall(todo_key) for todo_key in todo_keys]
         return todos
+
+    def get_completed_todos(self):
+        todo_keys = self.redis_client.keys(f'{self.todo_key_prefix}*')
+        completed_todos = [
+            self.redis_client.hgetall(todo_key)
+            for todo_key in todo_keys
+            if self.redis_client.hget(todo_key, 'completed') == '1'
+        ]
+        return completed_todos
+    
+    def get_pending_todos(self):
+        todo_keys = self.redis_client.keys(f'{self.todo_key_prefix}*')
+        completed_todos = [
+            self.redis_client.hgetall(todo_key)
+            for todo_key in todo_keys
+            if self.redis_client.hget(todo_key, 'completed') == '0'
+        ]
+        return completed_todos
 
     def get_todo_by_id(self, todo_id):
         todo_key = f'{self.todo_key_prefix}{todo_id}'
-        todo_data = self.redis_client.get(todo_key)
+        todo_data = self.redis_client.hgetall(todo_key)
         if todo_data:
-            return json.loads(todo_data)
+            return todo_data
         return None
 
     def get_todo(self, query=None):
@@ -31,7 +49,7 @@ class TodoDALRedis:
             description_query = query.get("description", "")
             todo_keys = self.redis_client.keys(f'{self.todo_key_prefix}*')
             todos = [
-                json.loads(self.redis_client.get(todo_key))
+                self.redis_client.hgetall(todo_key)
                 for todo_key in todo_keys
                 if title_query.lower() in self.redis_client.hget(todo_key, 'title').lower()
                 and description_query.lower() in self.redis_client.hget(todo_key, 'description').lower()
@@ -42,20 +60,19 @@ class TodoDALRedis:
 
     def update_todo(self, todo_id, title=None, description=None, completed=None):
         todo_key = f'{self.todo_key_prefix}{todo_id}'
-        todo_data = self.redis_client.get(todo_key)
+        todo_data = self.redis_client.hgetall(todo_key)
         if not todo_data:
             return None
 
-        todo = json.loads(todo_data)
         if title:
-            todo['title'] = title
+            self.redis_client.hset(todo_key, 'title', title)
         if description:
-            todo['description'] = description
+            self.redis_client.hset(todo_key, 'description', description)
         if completed is not None:
-            todo['completed'] = 0 if completed==False else 1
+            self.redis_client.hset(todo_key, 'completed', 0 if completed == False else 1)
 
-        self.redis_client.set(todo_key, json.dumps(todo))
-        return todo
+        updated_todo = self.redis_client.hgetall(todo_key)
+        return updated_todo
 
     def delete_todo(self, todo_id):
         todo_key = f'{self.todo_key_prefix}{todo_id}'

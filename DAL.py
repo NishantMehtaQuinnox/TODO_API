@@ -23,6 +23,14 @@ class TodoDAL:
     def get_all_todos(self):
         return self.session.query(Todo).all()
 
+    def get_completed_todos(self):
+        completed_todos = self.session.query(Todo).filter(Todo.completed == True).all()
+        return completed_todos
+
+    def get_pending_todos(self):
+        pending_todos = self.session.query(Todo).filter(Todo.completed == False).all()
+        return pending_todos
+
     def get_todo_by_id(self, todo_id):
         return self.session.query(Todo).filter_by(id=todo_id).first()
 
@@ -37,7 +45,11 @@ class TodoDAL:
             todos = self.session.query(Todo).all()
         return todos
 
-    def update_todo(self, todo_id, title=None, description=None, completed=None):
+    def update_todo(self,
+                    todo_id,
+                    title=None,
+                    description=None,
+                    completed=None):
         todo = self.get_todo_by_id(todo_id)
         if not todo:
             return None

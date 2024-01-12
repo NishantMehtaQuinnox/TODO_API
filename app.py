@@ -4,8 +4,9 @@ from BAL import TodoBAL
 from models import Todo,TodoCreate,TodoUpdate,TodoQuery
 import uvicorn
 
+use_redis = True
 app = FastAPI()
-todo_bal = TodoBAL()
+todo_bal = TodoBAL(use_redis)
 
 @app.post("/todos/", response_model=Todo)
 async def create_todo(todo: TodoCreate):
@@ -26,6 +27,20 @@ async def read_todo(todo_id: int):
         raise HTTPException(status_code=404, detail="Todo not found")
     return todo
 
+@app.get("/todos/getcompleted/", response_model=List[Todo])
+async def get_completed_todos():
+    todo = todo_bal.get_completed_todos()
+    if not todo:
+        raise HTTPException(status_code=404, detail="Todo not found")
+    return todo
+
+@app.get("/todos/getpending/", response_model=List[Todo])
+async def get_pending_todos():
+    todo = todo_bal.get_pending_todos()
+    if not todo:
+        raise HTTPException(status_code=404, detail="Todo not found")
+    return todo
+
 @app.put("/todos/{todo_id}", response_model=Todo)
 async def update_todo(todo_id: int, todo_update: TodoUpdate):
     updated_todo = todo_bal.update_todo(todo_id, **todo_update.dict(exclude_unset=True))
@@ -40,5 +55,6 @@ async def delete_todo(todo_id: int):
         raise HTTPException(status_code=404, detail="Todo not found")
     return True
 
+
 if __name__ == "__main__":
-    uvicorn.run(app,reload=False,ws_ping_timeout=1800, ws_ping_interval=30)
+    uvicorn.run(app, reload=False, ws_ping_timeout=1800, ws_ping_interval=30)

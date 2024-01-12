@@ -1,11 +1,13 @@
 from DAL import TodoDAL
 from DAL_Redis import TodoDALRedis
 
+
 class TodoBAL:
 
-    def __init__(self):
+    def __init__(self, use_redis):
         #self.todo_dal = TodoDAL()
-        self.todo_dal = TodoDALRedis()
+        self.use_redis = use_redis
+        self.todo_dal = TodoDALRedis() if use_redis else TodoDAL()
 
     def is_todo_list_empty(self):
         todos = self.todo_dal.get_todo()
@@ -19,6 +21,12 @@ class TodoBAL:
 
     def get_todo_by_id(self, todo_id):
         return self.todo_dal.get_todo_by_id(todo_id)
+
+    def get_pending_todos(self):
+        return self.todo_dal.get_pending_todos()
+
+    def get_completed_todos(self):
+        return self.todo_dal.get_completed_todos()
 
     def update_todo(self,
                     todo_id,
